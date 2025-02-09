@@ -1,5 +1,5 @@
 from tkinter import *
-
+from functools import partial  # to prevent unwanted windows
 
 class Converter:
     """
@@ -22,15 +22,24 @@ class Converter:
         self.to_help_button.grid(row=1, padx=5, pady=5)
 
     def to_help(self):
-        Displayhelp()
+        """
+        Displays help dialogue box
+        """
+        DisplayHelp(self)
 
 
-class Displayhelp:
+class DisplayHelp:
 
-    def __init__(self):
+    def __init__(self, partner):
         # setup dialogue box and background colour
         background = "#ffe6cc"
         self.help_box = Toplevel()
+
+        # disable help button
+        partner.to_help_button.config(state=DISABLED)
+
+        # If user press cross at top, closes help and 'releases' help button
+        self.help_box.protocol('WM_DELETE_WINDOW', partial(self.close_help, partner))
 
         self.help_frame = Frame(self.help_box, width=300,
                                 height=200)
@@ -51,14 +60,14 @@ class Displayhelp:
                     " click the 'History / Export' button."
 
         self.help_text_label = Label(self.help_frame,
-                                     text="help text goes here", wraplength=350,
+                                     text=help_text, wraplength=350,
                                      justify="left")
         self.help_text_label.grid(row=1, padx=10)
 
         self.dismiss_button = Button(self.help_frame,
                                      font=("Arial", "12", "bold"),
                                      text="Dismiss", bg="#CC6600", fg="#FFFFFF",
-                                     command=self.close_help)
+                                     command=partial(self.close_help, partner))
         self.dismiss_button.grid(row=2, pady=10, padx=10)
 
         # List and loop to set background colour on everything except the buttons
@@ -67,7 +76,12 @@ class Displayhelp:
         for item in recolour_list:
             item.config(bg=background)
 
-    def close_help(self):
+    def close_help(self, partner):
+        """
+        Closes help dialogue box (and enables help button)
+        """
+        # put help button back to normal...
+        partner.to_help_button.config(state=NORMAL)
         self.help_box.destroy()
 
 
